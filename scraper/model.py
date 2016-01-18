@@ -1,6 +1,6 @@
 
-from sqlalchemy import Column, Integer, String, ForeignKey, Time, Date
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, ForeignKey, Time, Date, create_engine
+from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -8,10 +8,14 @@ Base = declarative_base()
 class Course(Base):
     __tablename__ = 'course'
     id = Column(Integer, primary_key=True)
-    name = Column(String(128))              # Max found = 57
+    name = Column(String(64))              # Max found = 57
+    department = Column(String(4))
+    code = Column(String(5))
+    section = Column(String(3))
     capacity_total = Column(Integer)
     capacity_taken = Column(Integer)
     capacity_remaining = Column(Integer)
+    days = relationship('Day')
 
 class Day(Base):
     __tablename__ = 'day'
@@ -26,5 +30,14 @@ class Day(Base):
     section_type = Column(String(32)) # Max found = 17
     instructors = Column(String(256)) # Max found = 202
     course_id = Column(Integer, ForeignKey('course.id'))
-    course = relationship(Course)
+    course = relationship('Course')
 
+engine = create_engine('sqlite:///schedule.db')
+
+Base.metadata.create_all(engine)
+
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+
+session = DBSession()

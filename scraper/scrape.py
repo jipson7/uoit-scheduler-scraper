@@ -3,14 +3,7 @@ from bs4 import BeautifulSoup as bs
 from datetime import datetime, date
 from urllib import request
 from sqlalchemy.orm import sessionmaker
-from model import Course, Day, Base
-from export_model import engine
-
-Base.metadata.bind = engine
-
-DBSession = sessionmaker(bind=engine)
-
-session = DBSession()
+from model import Course, Day, session
 
 main_url = 'http://ssbp.mycampus.ca/prod/bwckschd.p_disp_dyn_sched?TRM=U'
 
@@ -39,10 +32,14 @@ def extract_data(source):
     if len(headers) != len(seat_tables) or len(seat_tables) != len(data_tables):
         raise Exception('Length of datasets are offset, cant be parsed without error')
     x = len(headers)
-    maxlen = 0
     for i in range(x):
         course = Course()
-        course.name = headers[i].getText()
+        header_data = [x.strip() for x in headers[i].getText().split('-')]
+        course.name = '-'.join(header_data[:-3])
+        course_code = header_data[-2].split()
+        course.department = course_code[0]
+        course.code = course_code[1]
+        course.section = header_data[-1]
 
         seat_table = seat_tables[i]
         seat_cells = seat_table.find_all('td', {'class': 'dbdefault'})
