@@ -1,6 +1,6 @@
-
+import os
 from sqlalchemy import Column, Integer, String, ForeignKey, Time, Date, create_engine
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker, backref
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -15,7 +15,7 @@ class Course(Base):
     capacity_total = Column(Integer)
     capacity_taken = Column(Integer)
     capacity_remaining = Column(Integer)
-    days = relationship('Day')
+    semester = Column(String(6))
 
 class Day(Base):
     __tablename__ = 'day'
@@ -30,9 +30,13 @@ class Day(Base):
     section_type = Column(String(32)) # Max found = 17
     instructors = Column(String(256)) # Max found = 202
     course_id = Column(Integer, ForeignKey('course.id'))
-    course = relationship('Course')
+    course = relationship(Course, backref=backref("days", cascade="all, delete-orphan"))
 
-engine = create_engine('sqlite:///schedule.db')
+try:
+    engine = create_engine(os.environ['SCRAPE_DATABASE'])
+except Exception as e:
+    print(e)
+    raise
 
 Base.metadata.create_all(engine)
 

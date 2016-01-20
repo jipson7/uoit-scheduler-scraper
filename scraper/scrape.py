@@ -7,11 +7,11 @@ from model import Course, Day, session
 
 main_url = 'http://ssbp.mycampus.ca/prod/bwckschd.p_disp_dyn_sched?TRM=U'
 
-def main():
+def main(semester):
     class_options = []
+    session.query(Course).filter_by(semester=semester).delete()
     driver = webdriver.Firefox()
     driver.get(main_url)
-    semester = getCurrentSemesterValue()
     driver.find_element_by_css_selector("option[value='" + semester + "']").click()
     driver.find_element_by_css_selector("input[value='Submit']").click()
     year_url = driver.current_url
@@ -22,9 +22,9 @@ def main():
     driver.find_element_by_css_selector("input[value='Class Search']").click()
     raw_html = driver.page_source
     driver.quit()
-    extract_data(raw_html)
+    extract_data(raw_html, semester)
 
-def extract_data(source):
+def extract_data(source, semester):
     soup = bs(source)
     headers = soup.find_all('th', {'class': 'ddheader', 'scope': 'col'})
     seat_tables = soup.find_all('table', {'summary': 'This layout table is used to present the seating numbers.'})
@@ -40,6 +40,7 @@ def extract_data(source):
         course.department = course_code[0]
         course.code = course_code[1]
         course.section = header_data[-1]
+        course.semester = semester
 
         seat_table = seat_tables[i]
         seat_cells = seat_table.find_all('td', {'class': 'dbdefault'})
@@ -94,5 +95,12 @@ def getCurrentSemesterValue():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    try:
+        semester = sys.argv[1]
+    except IndexError:
+        print('Must provide the first month of the request semester in the form YYYYMM')
+        print('ex.  201601, 201505, 201409, etc')
+        sys.exit()
+    main(semester)
 
