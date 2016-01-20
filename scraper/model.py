@@ -5,17 +5,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-class Course(Base):
-    __tablename__ = 'course'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(64))              # Max found = 57
-    department = Column(String(4))
-    code = Column(String(5))
-    section = Column(String(3))
-    capacity_total = Column(Integer)
-    capacity_taken = Column(Integer)
-    capacity_remaining = Column(Integer)
-    semester = Column(String(6))
 
 class Day(Base):
     __tablename__ = 'day'
@@ -29,8 +18,21 @@ class Day(Base):
     end_date = Column(Date, nullable=True)
     section_type = Column(String(32)) # Max found = 17
     instructors = Column(String(256)) # Max found = 202
-    course_id = Column(Integer, ForeignKey('course.id'))
-    course = relationship(Course, backref=backref("days", cascade="all, delete-orphan"))
+    course_id = Column(Integer, ForeignKey('course.id', ondelete='CASCADE'))
+
+class Course(Base):
+    __tablename__ = 'course'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(64))              # Max found = 57
+    department = Column(String(4))
+    code = Column(String(5))
+    section = Column(String(3))
+    capacity_total = Column(Integer)
+    capacity_taken = Column(Integer)
+    capacity_remaining = Column(Integer)
+    semester = Column(String(6))
+    days = relationship(Day, backref='course', passive_deletes=True)
+
 
 try:
     engine = create_engine(os.environ['SCRAPE_DATABASE'])

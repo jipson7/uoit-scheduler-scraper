@@ -10,6 +10,7 @@ main_url = 'http://ssbp.mycampus.ca/prod/bwckschd.p_disp_dyn_sched?TRM=U'
 def main(semester):
     class_options = []
     session.query(Course).filter_by(semester=semester).delete()
+    session.commit()
     driver = webdriver.Firefox()
     driver.get(main_url)
     driver.find_element_by_css_selector("option[value='" + semester + "']").click()
