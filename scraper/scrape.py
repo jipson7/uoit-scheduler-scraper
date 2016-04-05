@@ -5,7 +5,7 @@ from urllib import request
 from sqlalchemy.orm import sessionmaker
 from model import Course, Day, session
 
-main_url = 'http://ssbp.mycampus.ca/prod/bwckschd.p_disp_dyn_sched?TRM=U'
+main_url = 'https://ssbp.mycampus.ca/prod_uoit/bwckschd.p_disp_dyn_sched?TRM=U'
 
 def main(semester):
     class_options = []
