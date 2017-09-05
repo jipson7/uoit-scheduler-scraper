@@ -1,10 +1,5 @@
 ###Usage
 
-```
-cd scraper
-
-```
-
 Edit run.sh and change the env to whatever database you want to export to.
 
 The script wont overwrite data. It will add semesters together if run on different ones consecutivley.
